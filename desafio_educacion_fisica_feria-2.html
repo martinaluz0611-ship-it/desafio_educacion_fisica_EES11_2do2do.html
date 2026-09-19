@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Desafío EF — Feria Escolar</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;color:#182033;min-height:100vh;background:linear-gradient(135deg,#dff7ff,#f2eaff,#eafff3);background-size:300% 300%;animation:bg 10s ease infinite}
+@keyframes bg{50%{background-position:100% 80%}}.wrap{max-width:940px;margin:auto;padding:18px}.card{background:#fffffff2;border-radius:28px;padding:28px;box-shadow:0 16px 45px #0002;animation:enter .5s ease}
+@keyframes enter{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}.hidden{display:none!important}.center{text-align:center}
+h1{font-size:clamp(34px,7vw,58px);margin:8px 0}h2{font-size:26px;line-height:1.25}.subtitle{font-size:18px}.hero{font-size:75px;animation:float 2s ease-in-out infinite}@keyframes float{50%{transform:translateY(-10px) rotate(2deg)}}
+.btn{border:0;border-radius:15px;padding:14px 21px;margin:7px;font-size:16px;font-weight:800;cursor:pointer;background:#6357e8;color:white;box-shadow:0 6px #4036a6;transition:.15s}.btn:hover{transform:translateY(-3px)}.btn:active{transform:translateY(3px);box-shadow:0 2px #4036a6}
+.categories{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:18px 0}.cat{padding:8px 12px;border-radius:20px;background:#eef0f8;font-size:13px;font-weight:bold}
+.top{display:flex;justify-content:space-between;gap:10px;align-items:center}.tag{background:#eeeaff;color:#5447d1;border-radius:20px;padding:8px 12px;font-weight:bold}.progress{height:12px;background:#e7e8ef;border-radius:20px;overflow:hidden;margin:16px 0}.bar{height:100%;width:0;background:linear-gradient(90deg,#6357e8,#2cb694);transition:.5s}
+.option{display:block;width:100%;text-align:left;border:2px solid #e8e9ef;background:#f8f9fc;border-radius:15px;padding:15px;margin:9px 0;font-size:16px;cursor:pointer;transition:.2s}.option:hover{transform:translateX(5px);border-color:#6357e8}.option:disabled{cursor:default}.correct{background:#e7fff3!important;border-color:#26ad70!important;animation:pulse .45s}.wrong{background:#fff0f3!important;border-color:#e35d77!important;animation:shake .4s}
+@keyframes pulse{50%{transform:scale(1.025)}}@keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+.visual{font-size:55px;text-align:center;margin:4px;animation:float 2.4s ease-in-out infinite}.fact{background:#f1f4ff;padding:14px;border-radius:15px;margin:14px 0}.small{color:#687080}.score{font-size:60px;font-weight:900}.qr{width:190px;height:190px;border-radius:14px;background:#eee;object-fit:cover;border:8px solid white;box-shadow:0 5px 20px #0002}
+.confetti{position:fixed;top:-20px;font-size:23px;pointer-events:none;animation:fall 1.9s linear forwards}@keyframes fall{to{transform:translateY(110vh) rotate(600deg);opacity:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<section class="card center" id="welcome">
+<div class="hero">🏃‍♀️🫀🧠💪</div>
+<h1>DESAFÍO EF</h1>
+<p class="subtitle"><b>¿Cuánto sabés sobre tu cuerpo y la actividad física?</b></p>
+<p>Elegí la respuesta correcta, aprendé datos curiosos y conseguí la mayor cantidad de puntos.</p>
+<div class="categories"><span class="cat">🫀 Salud</span><span class="cat">💪 Cuerpo humano</span><span class="cat">🏃 Entrenamiento</span><span class="cat">🥗 Hábitos</span><span class="cat">⚽ Deportes</span></div>
+<button class="btn" onclick="start()">COMENZAR 🚀</button>
+<button class="btn" onclick="soundTest()">🔊 PROBAR SONIDO</button>
+<p class="small">20 preguntas · dificultad media/alta · respuestas mezcladas</p>
+</section>
+
+<section class="card hidden" id="quiz">
+<div class="top"><span class="tag" id="counter"></span><span id="streak">🔥 Racha: 0</span></div>
+<div class="progress"><div class="bar" id="bar"></div></div>
+<div class="visual" id="visual">🏃</div>
+<p class="small" id="category"></p><h2 id="q"></h2><div id="opts"></div>
+<p id="feedback"></p><div class="fact hidden" id="fact"></div>
+<button class="btn hidden" id="next" onclick="next()">SIGUIENTE →</button>
+</section>
+
+<section class="card center hidden" id="result">
+<div class="hero">🏆</div><h1>¡Terminaste!</h1><div class="score" id="score"></div><h2 id="msg"></h2><p id="detail"></p>
+<button class="btn" onclick="restart()">JUGAR DE NUEVO 🔄</button>
+<hr style="border:0;border-top:1px solid #eee;margin:25px">
+<h2>📱 ¿Querés compartir el desafío?</h2>
+<p>El QR necesita la <b>URL pública</b> de la página para que otras personas puedan abrirla desde sus celulares.</p>
+<div id="qrArea"><div class="qr" style="display:flex;align-items:center;justify-content:center;font-size:42px">QR</div></div>
+<p class="small">Cuando tengas la URL donde se publique la página, reemplazamos este QR por uno real.</p>
+</section>
+</div>
+
+<script>
+const data=[
+["🫀","Salud","¿Cuál de estos factores puede influir en la recuperación después de hacer actividad física?",["Dormir y descansar adecuadamente","No beber líquidos","Evitar toda comida","Entrenar sin pausas"],0,"La recuperación incluye descanso, hidratación y una alimentación adecuada."],
+["🧠","Cuerpo humano","¿Qué sistema coordina los movimientos voluntarios?",["Digestivo","Nervioso","Respiratorio","Endocrino"],1,"El sistema nervioso participa en la planificación y coordinación del movimiento."],
+["💪","Entrenamiento","¿Qué capacidad permite ejercer fuerza rápidamente?",["Potencia","Flexibilidad","Resistencia","Equilibrio"],0,"La potencia combina fuerza y velocidad para producir movimientos rápidos."],
+["🫁","Cuerpo humano","Durante el ejercicio, ¿qué ocurre generalmente con la respiración?",["Se hace más lenta","Aumenta para aportar más oxígeno","Se detiene brevemente","No cambia nunca"],1,"La respiración suele aumentar para responder a la mayor demanda de oxígeno."],
+["🥗","Hábitos","¿Qué significa tener una alimentación variada?",["Comer siempre lo mismo","Incluir alimentos de distintos grupos y nutrientes","Eliminar todos los carbohidratos","Comer solo cuando se hace deporte"],1,"La variedad ayuda a obtener distintos nutrientes."],
+["🏃","Entrenamiento","¿Cuál es una característica de una progresión adecuada del entrenamiento?",["Aumentar la exigencia de golpe","Adaptar gradualmente la carga","No cambiar nunca la intensidad","Entrenar siempre al máximo"],1,"La progresión gradual permite adaptar el esfuerzo a las características de cada persona."],
+["🦴","Cuerpo humano","¿Qué estructura une principalmente un hueso con otro hueso?",["Tendón","Ligamento","Músculo","Nervio"],1,"Los ligamentos conectan huesos y ayudan a estabilizar las articulaciones."],
+["⚽","Deportes","¿Qué capacidad es especialmente importante para mantener el control corporal al cambiar de dirección?",["Agilidad","Resistencia aeróbica","Flexibilidad pasiva","Fuerza de agarre"],0,"La agilidad implica cambiar de posición o dirección con control y rapidez."],
+["💧","Salud","¿Por qué el cuerpo pierde líquido durante actividades físicas?",["Principalmente por la sudoración y la respiración","Porque los huesos absorben agua","Porque los músculos dejan de funcionar","Porque aumenta la cantidad de aire"],0,"El sudor es una vía importante de pérdida de agua durante el ejercicio."],
+["❤️","Cuerpo humano","¿Qué órgano impulsa la sangre por el sistema circulatorio?",["Pulmón","Corazón","Hígado","Estómago"],1,"El corazón funciona como una bomba que impulsa la sangre."],
+["🧘","Entrenamiento","¿Qué capacidad se relaciona con el rango de movimiento de una articulación?",["Velocidad","Flexibilidad","Potencia","Resistencia"],1,"La flexibilidad se relaciona con la amplitud de movimiento."],
+["🛌","Hábitos","¿Por qué el sueño es importante para una persona físicamente activa?",["Ayuda a la recuperación y al funcionamiento general","Hace innecesaria la hidratación","Reemplaza toda actividad física","Evita aprender nuevas habilidades"],0,"El sueño participa en procesos de recuperación y funcionamiento del organismo."],
+["🦵","Cuerpo humano","¿Qué tejido produce la fuerza que mueve los huesos?",["Músculo","Ligamento","Cartílago","Piel"],0,"La contracción muscular genera fuerza y permite el movimiento de los huesos."],
+["🔥","Prevención","¿Cuál es el objetivo principal de una entrada en calor?",["Preparar progresivamente al organismo para la actividad","Agotar el cuerpo antes del ejercicio","Reemplazar el entrenamiento","Evitar beber agua"],0,"La entrada en calor busca preparar progresivamente al organismo para el esfuerzo."],
+["🧩","Entrenamiento","¿Qué capacidad combina percepción, control y ejecución de movimientos coordinados?",["Coordinación","Solo fuerza máxima","Solo resistencia","Solo flexibilidad"],0,"La coordinación permite organizar y controlar diferentes acciones motoras."],
+["🏃‍♀️","Salud","Si una actividad produce una molestia importante o dolor intenso, ¿qué conducta es más segura?",["Aumentar la intensidad","Ignorarlo","Detenerse y comunicarlo a un adulto o profesional cuando corresponda","Ocultarlo"],2,"Una molestia importante merece atención; no es necesario continuar para demostrar resistencia."],
+["🫀","Entrenamiento","¿Qué capacidad permite mantener un esfuerzo durante un período prolongado?",["Resistencia","Potencia","Velocidad","Equilibrio"],0,"La resistencia ayuda a sostener esfuerzos durante períodos prolongados."],
+["🧠","Aprendizaje motor","¿Qué puede ayudar a mejorar una habilidad motriz?",["Práctica progresiva y retroalimentación","No practicar nunca","Cambiar de objetivo cada segundo","Evitar recibir información"],0,"La práctica y la retroalimentación pueden ayudar a perfeccionar habilidades motoras."],
+["⚖️","Cuerpo humano","¿Qué función cumple principalmente el esqueleto?",["Dar soporte y proteger órganos, entre otras funciones","Producir oxígeno","Digestionar alimentos","Bombear sangre"],0,"El esqueleto da soporte, protege órganos y participa junto con los músculos en el movimiento."],
+["🌟","Salud","¿Cuál afirmación es más adecuada sobre la actividad física?",["Solo sirve para competir","Puede aportar beneficios físicos, psicológicos y sociales","Cuanto más intensa, siempre es mejor","Solo es necesaria para deportistas"],1,"La actividad física puede contribuir a distintos aspectos del bienestar y no se limita al deporte competitivo."]
+];
+let i=0,score=0,streak=0,answered=false;
+function beep(ok=true){try{let c=new AudioContext(),o=c.createOscillator(),g=c.createGain();o.frequency.value=ok?660:220;o.connect(g);g.connect(c.destination);g.gain.setValueAtTime(.08,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.18);o.start();o.stop(c.currentTime+.18)}catch(e){}}
+function soundTest(){beep(true);setTimeout(()=>beep(false),220)}
+function start(){document.getElementById("welcome").classList.add("hidden");document.getElementById("quiz").classList.remove("hidden");show()}
+function show(){answered=false;let x=data[i];document.getElementById("counter").textContent=`Pregunta ${i+1} / ${data.length}`;document.getElementById("bar").style.width=(i/data.length*100)+"%";document.getElementById("visual").textContent=x[0];document.getElementById("category").textContent=x[1];document.getElementById("q").textContent=x[2];document.getElementById("feedback").textContent="";document.getElementById("fact").classList.add("hidden");document.getElementById("next").classList.add("hidden");document.getElementById("streak").textContent=`🔥 Racha: ${streak}`;let box=document.getElementById("opts");box.innerHTML="";x[3].forEach((t,n)=>{let b=document.createElement("button");b.className="option";b.textContent=String.fromCharCode(65+n)+") "+t;b.onclick=()=>answer(n,b);box.appendChild(b)})}
+function answer(n,b){if(answered)return;answered=true;let x=data[i];document.querySelectorAll(".option").forEach(z=>z.disabled=true);if(n===x[4]){score++;streak++;b.classList.add("correct");beep(true);document.getElementById("feedback").textContent="✅ ¡Correcto!"+(streak>1?" 🔥 ¡Racha!":"");confetti(streak>2?12:5)}else{streak=0;b.classList.add("wrong");document.querySelectorAll(".option")[x[4]].classList.add("correct");beep(false);document.getElementById("feedback").textContent="❌ Incorrecto. La respuesta correcta está en verde."}document.getElementById("streak").textContent=`🔥 Racha: ${streak}`;document.getElementById("fact").textContent="💡 Dato: "+x[5];document.getElementById("fact").classList.remove("hidden");document.getElementById("next").classList.remove("hidden")}
+function next(){i++;if(i<data.length)show();else finish()}
+function finish(){document.getElementById("quiz").classList.add("hidden");document.getElementById("result").classList.remove("hidden");document.getElementById("score").textContent=`${score} / ${data.length}`;let p=score/data.length;document.getElementById("msg").textContent=p===1?"🏆 ¡Puntaje perfecto!":p>=.8?"🌟 ¡Excelente!":p>=.6?"👏 ¡Muy bien!":"💪 ¡Buen intento!";document.getElementById("detail").textContent=`Acertaste ${score} de ${data.length} preguntas.`;if(p>=.8)confetti(35)}
+function restart(){i=0;score=0;streak=0;document.getElementById("result").classList.add("hidden");document.getElementById("quiz").classList.remove("hidden");show()}
+function confetti(n){for(let z=0;z<n;z++){let e=document.createElement("div");e.className="confetti";e.textContent=["🎉","⭐","💪","🏃","🧠","❤️"][Math.floor(Math.random()*6)];e.style.left=Math.random()*100+"vw";e.style.animationDelay=Math.random()*.4+"s";document.body.appendChild(e);setTimeout(()=>e.remove(),2200)}}
+</script>
+</body></html>
